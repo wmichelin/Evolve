@@ -12,6 +12,7 @@ import { renderFortress, fortressTech, warlordSetup } from './portal.js';
 import { edenicTech, renderEdenic } from './edenic.js';
 import { tauCetiTech, renderTauCeti, loneSurvivor } from './truepath.js';
 import { arpa, gainGene, gainBlood } from './arpa.js';
+import { syncMobilePanels, isMobileViewport, isTouchMode } from './mobile.js';
 import { production, highPopAdjust } from './prod.js';
 import { techList, techPath } from './tech.js';
 import { defineGovernor, govActive, removeTask, gov_tasks } from './governor.js';
@@ -6341,12 +6342,10 @@ export function setAction(c_action,action,type,old,prediction){
         },
         methods: {
             action(args){
-                if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/ && global.settings.touch) ? true : false){
+                if (isTouchMode() && !isMobileViewport()){
                     return;
                 }
-                else {
-                    runAction(c_action,action,type);
-                }
+                runAction(c_action,action,type);
             },
             describe(){
                 srSpeak(srDesc(c_action,old));
@@ -7255,7 +7254,7 @@ export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
     bres = bres || false;
     
     let touch = false;
-    if (action && a_type && 'ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/) && global.settings.touch ? true : false){
+    if (action && a_type && isTouchMode() && !isMobileViewport()){
         touch = $(`<a id="touchButton" class="button is-dark touchButton">${c_action.hasOwnProperty('touchlabel') ? c_action.touchlabel : loc('construct')}</a>`);
         parent.append(touch);
 
@@ -9611,6 +9610,7 @@ export function resQueue(){
     catch {
         global.r_queue.queue = [];
     }
+    syncMobilePanels();
 }
 
 export function clearResDrag(){

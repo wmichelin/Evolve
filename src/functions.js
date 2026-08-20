@@ -1,4 +1,5 @@
 import { global, save, message_logs, message_filters, webWorker, keyMultiplier, intervals, resizeGame, atrack, p_on, quantum_level, tmp_vars } from './vars.js';
+import { isTouchMode, isMobileViewport, syncMobilePanels } from './mobile.js';
 import { loc } from './locale.js';
 import { races, traits, genus_def, traitSkin, fathomCheck } from './races.js';
 import { actions, actionDesc } from './actions.js';
@@ -15,67 +16,122 @@ import { shipCosts, TPShipDesc } from './truepath.js';
 import { mechCost, mechDesc } from './portal.js';
 
 var popperRef = false;
+var popperDismissBound = false;
+const LONG_PRESS_MS = 500;
+
+function bindPopperDismiss(){
+    if (popperDismissBound){
+        return;
+    }
+    popperDismissBound = true;
+    $(document).on('click', function(e){
+        if ($(`#popper`).length === 0){
+            return;
+        }
+        if ($(e.target).closest(`#popper, .popper-trigger`).length){
+            return;
+        }
+        clearPopper();
+    });
+}
+
+function showPopper(id, content, opts, triggerEl){
+    if (popperRef || $(`#popper`).length > 0){
+        clearPopper();
+    }
+    let wide = opts['wide'] ? ' wide' : '';
+    let classes = opts['classes'] ? opts['classes'] : `has-background-light has-text-dark pop-desc`;
+    var popper = $(`<div id="popper" class="popper${wide} ${classes}" data-id="${id}"></div>`);
+    if (opts['attach']){
+        $(opts['attach']).append(popper);
+    }
+    else {
+        $(`#main`).append(popper);
+    }
+    if (content){
+        popper.append(typeof content === 'function' ? content({ this: triggerEl, popper: popper }) : content);
+    }
+
+    popperRef = Popper.createPopper(opts['self'] ? triggerEl : $(opts.elm)[0],
+        document.querySelector(`#popper`),
+        {
+            placement: opts['placement'],
+            modifiers: [
+                {
+                    name: 'flip',
+                    enabled: true,
+                },
+                {
+                    name: 'offset',
+                    options: {
+                        offset: opts['offset'] ? opts['offset'] : [0, 0],
+                    },
+                }
+            ],
+        }
+    );
+
+    popper.show();
+    if (opts.hasOwnProperty('in') && typeof opts['in'] === 'function'){
+        opts['in']({ this: triggerEl, popper: popper, id: `popper` });
+    }
+
+    if (eventActive('firework') && global[global.race['cataclysm'] || global.race['orbit_decayed'] ? 'space' : 'city'].firework.on > 0){
+        $(popper).append(`<span class="pyro"><span class="before"></span><span class="after"></span></span>`);
+    }
+}
+
 export function popover(id,content,opts){
     if (!opts){ opts = {}; }
     if (!opts.hasOwnProperty('elm')){ opts['elm'] = '#'+id; }
     if (!opts.hasOwnProperty('bind')){ opts['bind'] = true; }
     if (!opts.hasOwnProperty('unbind')){ opts['unbind'] = true; }
     if (!opts.hasOwnProperty('placement')){ opts['placement'] = 'bottom'; }
+    $(opts.elm).addClass('popper-trigger');
+
     if (opts['bind']){
-        $(opts.elm).on(opts['bind_mouse_enter'] ? 'mouseenter' : 'mouseover',function(){
-            if (popperRef || $(`#popper`).length > 0){
-                clearPopper();
-            }
-            let wide = opts['wide'] ? ' wide' : '';
-            let classes = opts['classes'] ? opts['classes'] : `has-background-light has-text-dark pop-desc`;
-            var popper = $(`<div id="popper" class="popper${wide} ${classes}" data-id="${id}"></div>`);
-            if (opts['attach']){
-                $(opts['attach']).append(popper);
-            }
-            else {
-                $(`#main`).append(popper);
-            }
-            if (content){
-                popper.append(typeof content === 'function' ? content({ this: this, popper: popper }) : content);
-            }
-
-            popperRef = Popper.createPopper(opts['self'] ? this : $(opts.elm)[0],
-                document.querySelector(`#popper`),
-                {
-                    placement: opts['placement'],
-                    modifiers: [
-                        {
-                            name: 'flip',
-                            enabled: true,
-                        },
-                        {
-                            name: 'offset',
-                            options: {
-                                offset: opts['offset'] ? opts['offset'] : [0, 0],
-                            },
-                        }
-                    ],
+        if (isMobileViewport()){
+            bindPopperDismiss();
+            let pressTimer = null;
+            $(opts.elm).on('touchstart.popper', function(e){
+                const triggerEl = this;
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(function(){
+                    showPopper(id, content, opts, triggerEl);
+                }, LONG_PRESS_MS);
+            });
+            $(opts.elm).on('touchend.popper touchmove.popper touchcancel.popper', function(){
+                clearTimeout(pressTimer);
+            });
+        }
+        else if (isTouchMode()){
+            bindPopperDismiss();
+            $(opts.elm).on('click.popper', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                const triggerEl = this;
+                if ($(`#popper`).length > 0 && $(`#popper`).data('id') === id){
+                    clearPopper();
+                    if (opts.hasOwnProperty('out') && typeof opts['out'] === 'function'){
+                        opts['out']({ this: triggerEl, popper: $(`#popper`), id: `popper`});
+                    }
+                    return;
                 }
-            );
-
-            popper.show();
-            if (opts.hasOwnProperty('in') && typeof opts['in'] === 'function'){
-                opts['in']({ this: this, popper: popper, id: `popper` });
-            }
-
-            if (eventActive('firework') && global[global.race['cataclysm'] || global.race['orbit_decayed'] ? 'space' : 'city'].firework.on > 0){
-                $(popper).append(`<span class="pyro"><span class="before"></span><span class="after"></span></span>`);
-            }
-        });
+                showPopper(id, content, opts, triggerEl);
+            });
+        }
+        else {
+            $(opts.elm).on(opts['bind_mouse_enter'] ? 'mouseenter' : 'mouseover',function(){
+                showPopper(id, content, opts, this);
+            });
+        }
     }
     if (opts['unbind']){
-        if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/ && global.settings.touch) ? true : false){
-            $(opts.elm).on('touchend',function(e){
-                clearPopper();
-                if (opts.hasOwnProperty('out') && typeof opts['out'] === 'function'){
-                    opts['out']({ this: this, popper: $(`#popper`), id: `popper`});
-                }
-            });
+        if (isMobileViewport()){
+            // Long-press info panels close via tap-outside.
+        }
+        else if (isTouchMode()){
+            // Toggle popper closes via second click or tap-outside.
         }
         else {
             $(opts.elm).on(opts['bind_mouse_enter'] ? 'mouseleave' : 'mouseout',function(){
@@ -86,15 +142,6 @@ export function popover(id,content,opts){
             });
         }
     }
-}
-
-if ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/ && global.settings.touch) ? true : false){
-    $(document).on('touchend',function(e){
-        if ($(`.popper`).length === 1){
-            clearPopper();
-            return;
-        }
-    });
 }
 
 export function clearPopper(id){
@@ -568,6 +615,7 @@ export function buildQueue(){
     catch {
         global.queue.queue = [];
     }
+    syncMobilePanels();
 }
 
 function clearDragQueue(){

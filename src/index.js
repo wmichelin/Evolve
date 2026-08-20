@@ -175,6 +175,9 @@ export function mainVue(){
             toggleTabLoad(){
                 initTabs();
             },
+            setTouchManual(){
+                global.settings.touchManual = true;
+            },
             unpause(){
                 $(`#pausegame`).removeClass('play');
                 $(`#pausegame`).removeClass('pause');
@@ -921,6 +924,7 @@ export function index(){
             </span>
         </span>
         <span class="version" id="versionLog"><a href="wiki.html#changelog" target="_blank"></a></span>
+        <span role="button" class="mobile-top-expand" aria-label="Calendar details" title="Details">&#9662;</span>
     </div>`);
 
     let main = $(`<div id="main" class="main"></div>`);
@@ -1413,7 +1417,7 @@ export function index(){
         <b-switch class="setting" v-model="s.expose"><span class="settings8" aria-label="${loc('settings8')}">{{ 'expose' | label }}</span></b-switch>
         <b-switch class="setting" v-model="s.tabLoad" @input="toggleTabLoad"><span class="settings11" aria-label="${loc('settings11')}">{{ 'tabLoad' | label }}</span></b-switch>
         <b-switch class="setting" v-model="s.boring"><span class="settings10" aria-label="${loc('settings10')}">{{ 'boring' | label }}</span></b-switch>
-        <b-switch class="setting" v-model="s.touch"><span class="settings16" aria-label="${loc('settings16')}">{{ 'touch' | label }}</span></b-switch>
+        <b-switch class="setting" v-model="s.touch" @input="setTouchManual"><span class="settings16" aria-label="${loc('settings16')}">{{ 'touch' | label }}</span></b-switch>
         <div>
             <div>${loc('key_mappings')}</div>
             <div class="keyMap"><span>${loc('multiplier',[10])}</span> <b-input v-model="s.keyMap.x10" id="x10Key"></b-input></div>

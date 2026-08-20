@@ -5510,3 +5510,321 @@ div.bigbang {
     position: absolute;
     top: 1rem;
 }
+
+// --- Mobile portrait layout (iPhone) ---
+.mobile-resource-dock,
+.mobile-nav,
+.mobile-sheet-backdrop,
+.mobile-sheet,
+.mobile-top-expand {
+    display: none;
+}
+
+@media only screen and (max-width: 430px) {
+    .mobile-layout {
+        overflow-x: hidden;
+        touch-action: manipulation;
+
+        .promoBar {
+            display: none;
+        }
+
+        .topBar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 2rem;
+            line-height: 2rem;
+            padding: 0 .5rem;
+            z-index: 30;
+
+            .planetWrap {
+                flex: 1;
+                min-width: 0;
+                margin-left: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .calendar {
+                flex: 0 0 auto;
+                margin: 0;
+
+                > :not(.atime) {
+                    display: none !important;
+                }
+
+                .atime {
+                    margin-left: 0 !important;
+                    padding: 0 .5rem !important;
+                }
+            }
+
+            .version {
+                display: none;
+            }
+
+            .mobile-top-expand {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 2rem;
+                height: 2rem;
+                margin-left: .25rem;
+                cursor: pointer;
+                font-size: 1rem;
+                line-height: 1;
+            }
+        }
+
+        .mobile-resource-dock {
+            display: block;
+            position: fixed;
+            top: 2rem;
+            left: 0;
+            right: 0;
+            z-index: 25;
+            max-height: 32vh;
+            overflow: hidden;
+            border-bottom: solid .0625rem;
+            touch-action: manipulation;
+        }
+
+        .mobile-dock-race {
+            padding: .125rem .5rem 0;
+            font-size: .75rem;
+            line-height: 1.2;
+
+            .race {
+                margin: 0;
+                display: flex;
+                flex-wrap: wrap;
+                gap: .25rem .75rem;
+                align-items: center;
+
+                .name,
+                .morale,
+                .power {
+                    font-size: .75rem;
+                }
+            }
+        }
+
+        .mobile-dock-resources {
+            max-height: calc(32vh - 2rem);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: .125rem .5rem .25rem;
+
+            .resources {
+                height: auto !important;
+                margin: 0;
+                padding: 0;
+
+                > h2 {
+                    display: none;
+                }
+            }
+
+            .resource {
+                font-size: .6875rem;
+                line-height: 1.2;
+                padding: .125rem 0;
+                min-height: 0;
+
+                div {
+                    width: auto;
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                h3.res {
+                    font-size: .6875rem;
+                    display: inline;
+                    margin: 0;
+                }
+
+                .count {
+                    font-size: .6875rem;
+                    margin-left: .25rem;
+                }
+
+                > :nth-child(2) {
+                    width: auto;
+                    min-width: .75rem;
+                }
+
+                > :nth-child(3),
+                .diff,
+                .craftable {
+                    font-size: .625rem;
+                    width: auto;
+                    flex: 0 0 auto;
+                    margin-left: .25rem;
+                }
+
+                .craftable > span {
+                    margin-left: .125rem;
+                }
+            }
+        }
+
+        .main {
+            margin: calc(2rem + var(--mobile-dock-height, 7.5rem)) .5rem 4.25rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+
+            > .columns {
+                display: block;
+            }
+
+            > .columns > .column {
+                width: 100% !important;
+                max-width: 100%;
+                min-width: 0 !important;
+            }
+
+            .leftColumn,
+            #queueColumn {
+                display: none !important;
+            }
+
+            .leftColumn .race {
+                margin-top: 0;
+            }
+
+            .content .action,
+            .evolving {
+                max-width: 100% !important;
+            }
+
+            .tabs ul {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tabs li a {
+                padding: .5rem .75rem;
+                font-size: .875rem;
+            }
+
+            .action .card,
+            .action .tile,
+            .action .actionWidth {
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .modal-card,
+            .modal .animation-content {
+                width: 95vw !important;
+                max-width: 95vw !important;
+            }
+
+            .popper {
+                max-width: 92vw !important;
+            }
+        }
+
+        .mobile-nav {
+            display: flex;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3.25rem;
+            z-index: 40;
+            border-top: solid .0625rem;
+            touch-action: manipulation;
+        }
+
+        .mobile-nav-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: .25rem .125rem;
+            cursor: pointer;
+            font-size: .6875rem;
+            line-height: 1.2;
+            touch-action: manipulation;
+
+            &.is-active {
+                font-weight: bold;
+            }
+        }
+
+        .mobile-nav-label {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mobile-sheet-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 45;
+        }
+
+        &.mobile-sheet-open .mobile-sheet-backdrop {
+            display: block;
+        }
+
+        .mobile-sheet {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 3.25rem;
+            z-index: 50;
+            border-top: solid .0625rem;
+            max-height: 70vh;
+
+            &.active {
+                display: block;
+            }
+        }
+
+        .mobile-sheet-header {
+            padding: .5rem .75rem;
+            font-weight: bold;
+            border-bottom: solid .0625rem;
+        }
+
+        .mobile-sheet-body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: .5rem .75rem;
+        }
+
+        .mobile-panel-log .msgQueue {
+            height: auto !important;
+            max-height: none !important;
+        }
+
+        .mobile-panel-queue .bldQueue,
+        .mobile-panel-queue .resQueue {
+            margin-bottom: .75rem;
+        }
+
+        .mobile-sheet-top {
+            bottom: auto;
+            top: 2rem;
+            max-height: calc(100vh - 5.25rem);
+        }
+
+        .b-tooltip .tooltip-content {
+            display: none !important;
+        }
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .b-tooltip .tooltip-content {
+        display: none !important;
+    }
+}

@@ -1358,6 +1358,10 @@ if (!global.settings.hasOwnProperty('touch')){
     global.settings['touch'] = false;
 }
 
+if (!global.settings.hasOwnProperty('touchManual')){
+    global.settings['touchManual'] = false;
+}
+
 if (!global.settings.hasOwnProperty('lowPowerBalance')){
     global.settings['lowPowerBalance'] = false;
 }
@@ -2045,6 +2049,27 @@ export function convertVersion(version){
 }
 
 export function resizeGame(){
+    const mobile = window.innerWidth <= 430 && window.innerHeight >= window.innerWidth;
+    if (mobile){
+        if ($('#msgQueue').hasClass('right')){
+            let build = $('#buildQueue').detach();
+            build.removeClass('right');
+            build.addClass('has-text-info');
+
+            let queue = $('#msgQueue').detach();
+            queue.removeClass('right');
+            queue.addClass('has-text-info');
+            queue.css('resize', 'vertical');
+            $('#queueColumn').removeClass('is-one-quarter');
+            $('#queueColumn').empty();
+            $('#sideQueue').append(build);
+            $('#sideQueue').append(queue);
+            $('#mainColumn').removeClass('is-half');
+            $('#mainColumn').addClass('is-three-quarters');
+        }
+        return;
+    }
+
     if ($(window).width() >= 1400 && $('#msgQueue:not(.right)')){
         let build = $('#buildQueue').detach();
         build.addClass('right');

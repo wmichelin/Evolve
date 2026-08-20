@@ -19,6 +19,7 @@ import { production, highPopAdjust, teamster, factoryBonus } from './prod.js';
 import { swissKnife } from './tech.js';
 import { vacuumCollapse } from './resets.js';
 import { index, mainVue, initTabs, loadTab } from './index.js';
+import { initMobileTouch, initMobileUI, isMobileViewport, syncMobileDockLayout } from './mobile.js';
 import { setWeather, seasonDesc, astrologySign, astroVal } from './seasons.js';
 import { getTopChange } from './wiki/change.js';
 import { enableDebug, updateDebugData } from './debug.js';
@@ -167,6 +168,7 @@ $(document).mousemove(function(e){
     });
 });
 
+initMobileTouch();
 index();
 var revision = global['revision'] ? global['revision'] : '';
 if (global['beta']){
@@ -294,6 +296,7 @@ Object.keys(gridDefs()).forEach(function(gridtype){
 });
 
 resizeGame();
+initMobileUI();
 
 vBind({
     el: '#race',
@@ -11441,6 +11444,10 @@ function midLoop(){
     });
 
     {
+        if (isMobileViewport()){
+            syncMobileDockLayout();
+        }
+        else {
         let msgHeight = $(`#msgQueue`).height();
         let buildHeight = $(`#buildQueue`).height();
         let totHeight = $(`.leftColumn`).height();
@@ -11511,6 +11518,7 @@ function midLoop(){
         $(`#buildQueue`).height(buildHeight);
         global.settings.msgQueueHeight = msgHeight;
         global.settings.buildQueueHeight = buildHeight;
+        }
     }
 
     if ($(`#mechList`).length > 0){
