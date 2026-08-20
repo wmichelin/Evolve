@@ -91,18 +91,7 @@ export function popover(id,content,opts){
 
     if (opts['bind']){
         if (isMobileViewport()){
-            bindPopperDismiss();
-            let pressTimer = null;
-            $(opts.elm).on('touchstart.popper', function(e){
-                const triggerEl = this;
-                clearTimeout(pressTimer);
-                pressTimer = setTimeout(function(){
-                    showPopper(id, content, opts, triggerEl);
-                }, LONG_PRESS_MS);
-            });
-            $(opts.elm).on('touchend.popper touchmove.popper touchcancel.popper', function(){
-                clearTimeout(pressTimer);
-            });
+            // Action details use the mobile inspector sheet instead.
         }
         else if (isTouchMode()){
             bindPopperDismiss();

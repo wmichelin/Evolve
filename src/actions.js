@@ -12,7 +12,7 @@ import { renderFortress, fortressTech, warlordSetup } from './portal.js';
 import { edenicTech, renderEdenic } from './edenic.js';
 import { tauCetiTech, renderTauCeti, loneSurvivor } from './truepath.js';
 import { arpa, gainGene, gainBlood } from './arpa.js';
-import { syncMobilePanels, isMobileViewport, isTouchMode } from './mobile.js';
+import { syncMobilePanels, isMobileViewport, isTouchMode, showMobileInspector } from './mobile.js';
 import { production, highPopAdjust } from './prod.js';
 import { techList, techPath } from './tech.js';
 import { defineGovernor, govActive, removeTask, gov_tasks } from './governor.js';
@@ -6346,6 +6346,15 @@ export function setAction(c_action,action,type,old,prediction){
                     return;
                 }
                 runAction(c_action,action,type);
+                if (isMobileViewport()){
+                    if ($('#mobileInspectorBody #popTimer').length){
+                        vBind({ el: '#mobileInspectorBody #popTimer' }, 'destroy');
+                    }
+                    const title = typeof c_action.title === 'string' ? c_action.title : c_action.title();
+                    showMobileInspector(title, function(parent){
+                        actionDesc(parent, c_action, global[action][type], old, action, type);
+                    });
+                }
             },
             describe(){
                 srSpeak(srDesc(c_action,old));

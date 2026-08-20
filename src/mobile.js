@@ -5,6 +5,8 @@ export const MOBILE_MAX_WIDTH = 430;
 
 let mobileMode = false;
 let activeSheet = null;
+let inspectorHasContent = false;
+let inspectorExpanded = true;
 
 const panelAnchors = {};
 
@@ -47,6 +49,13 @@ function appendMobileChrome(){
         <div id="mobileResourceDock" class="mobile-resource-dock" aria-label="${loc('tab_resources')}">
             <div id="mobileDockRace" class="mobile-dock-race"></div>
             <div id="mobileDockResources" class="mobile-dock-resources"></div>
+        </div>
+        <div id="mobileInspector" class="mobile-inspector" aria-hidden="true">
+            <button type="button" class="mobile-inspector-header" aria-expanded="true">
+                <span class="mobile-inspector-title"></span>
+                <span class="mobile-inspector-toggle" aria-hidden="true">&#9662;</span>
+            </button>
+            <div id="mobileInspectorBody" class="mobile-inspector-body pop-desc has-background-light has-text-dark"></div>
         </div>
         <div id="mobileNav" class="mobile-nav" aria-label="Mobile navigation">
             <button type="button" class="mobile-nav-btn" data-sheet="log" aria-label="${loc('message_log')}">
@@ -93,6 +102,13 @@ function bindMobileEvents(){
         e.preventDefault();
         e.stopPropagation();
         toggleMobileSheet('top');
+    });
+
+    $('#mobileInspector').on('click', '.mobile-inspector-header', function(e){
+        e.preventDefault();
+        inspectorExpanded = $('#mobileInspector').toggleClass('expanded').hasClass('expanded');
+        $(this).attr('aria-expanded', inspectorExpanded ? 'true' : 'false');
+        syncInspectorLayout();
     });
 
     let resizeTimer;
@@ -171,8 +187,54 @@ function layoutMobilePanels(){
     syncMobileDockLayout();
 }
 
+function hideInspector(){
+    $('#mobileInspector').removeClass('visible expanded').attr('aria-hidden', 'true');
+    $('body').removeClass('mobile-inspector-open');
+    document.documentElement.style.setProperty('--mobile-inspector-height', '0px');
+}
+
+function showInspectorChrome(){
+    $('#mobileInspector').addClass('visible').attr('aria-hidden', 'false');
+    if (inspectorExpanded){
+        $('#mobileInspector').addClass('expanded');
+    }
+    else {
+        $('#mobileInspector').removeClass('expanded');
+    }
+    $('.mobile-inspector-header').attr('aria-expanded', inspectorExpanded ? 'true' : 'false');
+    $('body').addClass('mobile-inspector-open');
+    syncInspectorLayout();
+}
+
+export function showMobileInspector(title, renderBody){
+    if (!mobileMode){
+        return;
+    }
+    if (activeSheet){
+        activeSheet = null;
+        $('body').removeClass('mobile-sheet-open');
+        $('.mobile-sheet').removeClass('active').attr('aria-hidden', 'true');
+        $('.mobile-nav-btn').removeClass('is-active');
+    }
+    const body = $('#mobileInspectorBody');
+    body.empty();
+    renderBody(body);
+    $('#mobileInspector .mobile-inspector-title').text(title);
+    inspectorHasContent = true;
+    inspectorExpanded = true;
+    showInspectorChrome();
+}
+
+export function clearMobileInspector(){
+    inspectorHasContent = false;
+    inspectorExpanded = true;
+    $('#mobileInspectorBody').empty();
+    hideInspector();
+}
+
 function restoreDesktopPanels(){
     closeMobileSheet();
+    clearMobileInspector();
     restorePanel('#resQueue');
     restorePanel('#buildQueue');
     restorePanel('#msgQueue');
@@ -195,6 +257,9 @@ export function openMobileSheet(name){
         closeMobileSheet();
         return;
     }
+    if ($('#mobileInspector').hasClass('visible')){
+        hideInspector();
+    }
     activeSheet = name;
     $('body').addClass('mobile-sheet-open');
     $('.mobile-sheet').removeClass('active').attr('aria-hidden', 'true');
@@ -211,6 +276,26 @@ export function closeMobileSheet(){
     $('body').removeClass('mobile-sheet-open');
     $('.mobile-sheet').removeClass('active').attr('aria-hidden', 'true');
     $('.mobile-nav-btn').removeClass('is-active');
+    if (inspectorHasContent){
+        showInspectorChrome();
+    }
+}
+
+export function syncInspectorLayout(){
+    if (!mobileMode || !$('#mobileInspector').hasClass('visible')){
+        document.documentElement.style.setProperty('--mobile-inspector-height', '0px');
+        return;
+    }
+    const height = $('#mobileInspector').outerHeight() || 0;
+    document.documentElement.style.setProperty('--mobile-inspector-height', `${height}px`);
+    const navHeight = $('#mobileNav').outerHeight() || 52;
+    const topHeight = $('#topBar').outerHeight() || 32;
+    const dockHeight = $('#mobileResourceDock').outerHeight() || 0;
+    const inspectorHeader = $('.mobile-inspector-header').outerHeight() || 36;
+    const sheetMax = Math.max(160, window.innerHeight - navHeight - topHeight - dockHeight - inspectorHeader - 24);
+    $('#mobileInspectorBody').css('max-height', `${Math.min(sheetMax, window.innerHeight * 0.4)}px`);
+    const totalHeight = $('#mobileInspector').outerHeight() || 0;
+    document.documentElement.style.setProperty('--mobile-inspector-height', `${totalHeight}px`);
 }
 
 function capitalize(str){
@@ -222,10 +307,12 @@ function adjustMobileHeights(){
         return;
     }
     syncMobileDockLayout();
+    syncInspectorLayout();
     const navHeight = $('#mobileNav').outerHeight() || 52;
     const topHeight = $('#topBar').outerHeight() || 32;
     const dockHeight = $('#mobileResourceDock').outerHeight() || 0;
-    const sheetMax = Math.max(200, window.innerHeight - navHeight - topHeight - dockHeight - 16);
+    const inspectorHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mobile-inspector-height')) || 0;
+    const sheetMax = Math.max(200, window.innerHeight - navHeight - topHeight - dockHeight - inspectorHeight - 16);
     $('.mobile-sheet.active .mobile-sheet-body').css('max-height', `${sheetMax}px`);
 }
 

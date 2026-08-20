@@ -5513,6 +5513,7 @@ div.bigbang {
 
 // --- Mobile portrait layout (iPhone) ---
 .mobile-resource-dock,
+.mobile-inspector,
 .mobile-nav,
 .mobile-sheet-backdrop,
 .mobile-sheet,
@@ -5671,7 +5672,7 @@ div.bigbang {
         }
 
         .main {
-            margin: calc(2rem + var(--mobile-dock-height, 7.5rem)) .5rem 4.25rem;
+            margin: calc(2rem + var(--mobile-dock-height, 7.5rem)) .5rem calc(4.25rem + var(--mobile-inspector-height, 0px));
             overflow-x: hidden;
             overflow-y: auto;
 
@@ -5726,6 +5727,66 @@ div.bigbang {
             .popper {
                 max-width: 92vw !important;
             }
+        }
+
+        .mobile-inspector {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 3.25rem;
+            z-index: 35;
+            border-top: solid .0625rem;
+            touch-action: manipulation;
+
+            &.visible {
+                display: block;
+            }
+        }
+
+        .mobile-inspector-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: .5rem .75rem;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .mobile-inspector-title {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: .8125rem;
+        }
+
+        .mobile-inspector-toggle {
+            flex: 0 0 1.25rem;
+            text-align: center;
+            font-size: .875rem;
+            transition: transform .15s ease;
+        }
+
+        .mobile-inspector.expanded .mobile-inspector-toggle {
+            transform: rotate(180deg);
+        }
+
+        .mobile-inspector-body {
+            display: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: .5rem .75rem;
+            font-size: .8125rem;
+        }
+
+        .mobile-inspector.expanded .mobile-inspector-body {
+            display: block;
         }
 
         .mobile-nav {
